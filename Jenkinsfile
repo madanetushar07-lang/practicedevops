@@ -57,21 +57,21 @@ pipeline {
             }
         }
 
-        
-    steps {
-        sh '''
-            docker ps -q --filter publish=80 | xargs -r docker rm -f
-            docker rm -f webapp-container 2>/dev/null || true
+        stage("Deploy") {
+            steps {
+                sh '''
+                    docker ps -q --filter publish=80 | xargs -r docker rm -f
+                    docker rm -f webapp-container 2>/dev/null || true
 
-            docker run -d --name webapp-container --restart unless-stopped \
-                -p 80:80 ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker run -d --name webapp-container --restart unless-stopped \
+                        -p 80:80 ${IMAGE_NAME}:${IMAGE_TAG}
 
-            sleep 5
-            [ "$(docker inspect -f '{{.State.Running}}' webapp-container)" = "true" ] \
-                || { docker logs webapp-container; exit 1; }
-            echo "Deployment successful!"
-        '''
-    }
-}
+                    sleep 5
+                    [ "$(docker inspect -f '{{.State.Running}}' webapp-container)" = "true" ] \
+                        || { docker logs webapp-container; exit 1; }
+                    echo "Deployment successful!"
+                '''
+            }
+        }
     }
 }
